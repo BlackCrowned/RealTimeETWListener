@@ -5,6 +5,8 @@
 #include <cstring>
 #include <Evntcons.h>
 
+#include "ConsumerClass.h"
+
 RealTimeEWTListener::RealTimeEWTListener() :
     _sessionHandle(0),
     _traceHandle(0)
@@ -138,8 +140,7 @@ ULONG RealTimeEWTListener::OpenTrace() {
 }
 
 ULONG RealTimeEWTListener::StartConsumption() {
-    _thread = std::thread(&RealTimeEWTListener::ProcessTraceThread, this);
-    _thread.detach();
+    ConsumerClass::StartProcessThread(this);
 
     return 0;
 }

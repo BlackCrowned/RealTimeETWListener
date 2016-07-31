@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <evntrace.h>
 #include <string>
-#include <thread>
+
 
 #ifdef RTEWTL_BUILD
 #define RTEWTL_API __declspec(dllexport) __cdecl
@@ -16,7 +16,6 @@ class RealTimeEWTListener {
     TRACEHANDLE _sessionHandle;
     TRACEHANDLE _traceHandle;
 
-    std::thread _thread;
 public:
     RealTimeEWTListener();
     ~RealTimeEWTListener();
@@ -25,9 +24,9 @@ public:
     ULONG StartConsumption();
     ULONG CloseTrace();
     ULONG StopTrace();
+    ULONG ProcessTraceThread();
 
 private:
-    ULONG ProcessTraceThread();
     void PrettyPrintTraceErrorCode(int error);
 };
 
