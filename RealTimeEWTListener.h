@@ -2,14 +2,17 @@
 #define INITGUID
 #include <Windows.h>
 #include <evntrace.h>
+#include <tdh.h>
 #include <string>
-
+#include <iomanip>
 
 #ifdef RTEWTL_BUILD
 #define RTEWTL_API __declspec(dllexport) __cdecl
 #elif
 #define RTEWTL_API __declspec(dllimport) __cdecl
 #endif
+
+#define _CRT_SECURE_NO_WARNINGS
 
 class RealTimeEWTListener {
 

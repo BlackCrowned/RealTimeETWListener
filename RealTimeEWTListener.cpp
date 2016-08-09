@@ -11,11 +11,7 @@ RealTimeEWTListener::RealTimeEWTListener() :
     _sessionHandle(0),
     _traceHandle(0)
 {
-    //Open a console!
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-    freopen("CONOUT$", "w", stderr);
-    freopen("CONIN$", "w", stdin);
+
 }
 
 RealTimeEWTListener::~RealTimeEWTListener() {
@@ -244,8 +240,119 @@ ULONG RTEWTL_API rtlOpenTrace(void* handle) {
     return error;
 }
 
-void WINAPI EventRecordCallback(PEVENT_RECORD EventRecord) {
-    std::cout << "Received event" << std::endl;
+void WINAPI EventRecordCallback(PEVENT_RECORD pEvent) {
+    /*
+     * CODE FROM: https://msdn.microsoft.com/en-us/library/windows/desktop/ee441329(v=vs.85).aspx
+     */
+    
+    //Skip event trace Event
+    if (IsEqualGUID(pEvent->EventHeader.ProviderId, EventTraceGuid) &&
+        pEvent->EventHeader.EventDescriptor.Opcode == EVENT_TRACE_TYPE_INFO)
+    {
+        return;
+    }
+
+    int status;
+    PTRACE_EVENT_INFO pInfo = NULL;
+    DWORD BufferSize = 0;
+    LPWSTR pwsEventGuid = NULL;
+
+    status = TdhGetEventInformation(pEvent, 0, NULL, pInfo, &BufferSize);
+
+    if (ERROR_INSUFFICIENT_BUFFER == status)
+    {
+        pInfo = (TRACE_EVENT_INFO*)malloc(BufferSize);
+        if (pInfo == NULL)
+        {
+            std::cout << "Failed to allocate memory for event info (size=" << BufferSize << ")." << std::endl;
+            status = ERROR_OUTOFMEMORY;
+            return;
+        }
+
+        // Retrieve the event metadata.
+        status = TdhGetEventInformation(pEvent, 0, NULL, pInfo, &BufferSize);
+    } else if (BufferSize == 0) {
+        return;
+    }
+
+    if (pInfo->DecodingSource == DecodingSourceWbem) {
+        HRESULT hr = StringFromCLSID(pInfo->EventGuid, &pwsEventGuid);
+
+        if (FAILED(hr))
+        {
+            wprintf(L"StringFromCLSID failed with 0x%x\n", hr);
+            status = hr;
+        }
+
+        wprintf(L"\nEvent GUID: %s\n", pwsEventGuid);
+        wprintf(L"Event version: %d\n", pEvent->EventHeader.EventDescriptor.Version);
+        wprintf(L"Event type: %d\n", pEvent->EventHeader.EventDescriptor.Opcode);
+    }
+    
+    //Only process DiskIO events
+    if (wcscmp(pwsEventGuid, L"{3D6FA8D4-FE05-11D0-9DDA-00C04FD7BA7C}") != 0) {
+        CoTaskMemFree(pwsEventGuid);
+        free(pInfo);
+        return;
+    }
+    //Only process read and write events
+    if (!(pEvent->EventHeader.EventDescriptor.Opcode == EVENT_TRACE_TYPE_IO_READ || pEvent->EventHeader.EventDescriptor.Opcode == EVENT_TRACE_TYPE_IO_WRITE)) {
+        CoTaskMemFree(pwsEventGuid);
+        free(pInfo);
+        return;
+    }
+    
+    FILETIME fileTime;
+
+    fileTime.dwHighDateTime = pEvent->EventHeader.TimeStamp.HighPart;
+    fileTime.dwLowDateTime = pEvent->EventHeader.TimeStamp.LowPart;
+
+    /*DWORD pointerSize;
+
+    if (EVENT_HEADER_FLAG_32_BIT_HEADER == (pEvent->EventHeader.Flags & EVENT_HEADER_FLAG_32_BIT_HEADER))
+    {
+        pointerSize = 4;
+    }
+    else
+    {
+        pointerSize = 8;
+    }*/
+
+    struct DiskIo_TypeGroup1
+    {
+        unsigned int DiskNumber;          //0
+        unsigned int IrpFlags;            //4
+        unsigned int TransferSize;        //8
+        unsigned int Reserved;            //12
+        unsigned long long ByteOffset;          //16
+        unsigned long long FileObject;          //24
+        unsigned long long Irp;                 //24 + pointerSize
+        unsigned long long HighResResponseTime; //24 + 2 * pointerSize
+        unsigned int IssuingThreadId;     //32 + 2 * pointerSize
+    };
+
+    DiskIo_TypeGroup1* eventData = static_cast<DiskIo_TypeGroup1*>(pEvent->UserData);
+
+    auto callbackData = CallbackData();
+
+    callbackData.Action = pEvent->EventHeader.EventDescriptor.Opcode == EVENT_TRACE_TYPE_IO_READ ? DiskAction::Read : DiskAction::Write;
+    callbackData.Time = DateTime::FromFileTime(((UInt64)fileTime.dwHighDateTime << 32) + (UInt64)fileTime.dwLowDateTime);
+    callbackData.DiskNumber = eventData->DiskNumber;
+    callbackData.IrpFlags = eventData->IrpFlags;
+    callbackData.TransferSize = eventData->TransferSize;
+    callbackData.ByteOffset = eventData->ByteOffset;
+    //callbackData.FileObject = UIntPtr(eventData->FileObject);
+    //callbackData.Irp = UIntPtr(eventData->Irp);
+    callbackData.HighResResponseTime = eventData->HighResResponseTime;
+    callbackData.IssuingThreadId = eventData->IssuingThreadId;
+
+    auto threadHandle = OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, callbackData.IssuingThreadId);
+    callbackData.IssuingProcessId = GetProcessIdOfThread(threadHandle);
+
+    ConsumerClass::FireEvent(callbackData);
+
+    CoTaskMemFree(pwsEventGuid);
+    free(pInfo);
 }
 
 ULONG rtlStartConsumption(void* handle) {
