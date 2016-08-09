@@ -12,8 +12,6 @@
 #define RTEWTL_API __declspec(dllimport) __cdecl
 #endif
 
-#define _CRT_SECURE_NO_WARNINGS
-
 class RealTimeEWTListener {
 
     TRACEHANDLE _sessionHandle;

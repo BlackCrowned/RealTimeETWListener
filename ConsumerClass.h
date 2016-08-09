@@ -3,13 +3,16 @@
 
 using namespace System;
 
+[SerializableAttribute]
 public enum class DiskAction {
     Read = 1,
     Write = 2,
     Other = 3,
 };
 
+[SerializableAttribute]
 public value struct CallbackData {
+    Int32 Index;
     DiskAction Action;
     DateTime Time;
     UInt32 DiskNumber;
@@ -22,6 +25,7 @@ public value struct CallbackData {
     UInt64 HighResResponseTime;
     UInt32 IssuingThreadId;
     Int32 IssuingProcessId;
+    String^ IssuingProcessName;
 };
 
 public ref class ConsumerClass

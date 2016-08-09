@@ -1,5 +1,7 @@
 #include "ConsumerClass.h"
 
+#define _CRT_SECURE_NO_WARNINGS
+
 using namespace System;
 using namespace System::Threading;
 

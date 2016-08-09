@@ -7,6 +7,8 @@
 
 #include "ConsumerClass.h"
 
+#define _CRT_SECURE_NO_WARNINGS
+
 RealTimeEWTListener::RealTimeEWTListener() :
     _sessionHandle(0),
     _traceHandle(0)
