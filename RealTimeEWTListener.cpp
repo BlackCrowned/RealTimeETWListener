@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 #include <cstring>
 #include <Evntcons.h>
 
@@ -55,13 +56,10 @@ ULONG RealTimeEWTListener::StartTrace() {
     size_t session_name_size = sizeof(KERNEL_LOGGER_NAME);
     size_t buffer_size = struct_size + session_name_size;
 
-    //Allocate the buffer
-    auto buffer = new char[buffer_size];
+    //Allocate the buffer and zero initialize (as required)
+    auto buffer = std::vector<char>(buffer_size, static_cast<char>(0));
 
-    //Zero initialize entire buffer (as required)
-    std::fill_n(buffer, buffer_size, 0);
-    
-    PEVENT_TRACE_PROPERTIES properties = reinterpret_cast<PEVENT_TRACE_PROPERTIES>(buffer);
+    PEVENT_TRACE_PROPERTIES properties = reinterpret_cast<PEVENT_TRACE_PROPERTIES>(buffer.data());
 
     properties->Wnode.BufferSize = buffer_size;
     properties->Wnode.Guid = SystemTraceControlGuid;  //Will be set automatically
@@ -79,7 +77,7 @@ ULONG RealTimeEWTListener::StartTrace() {
     properties->LoggerNameOffset = struct_size;
 
     //Copy name to the end
-    strcpy(buffer + struct_size, KERNEL_LOGGER_NAME);
+    strcpy(buffer.data() + struct_size, KERNEL_LOGGER_NAME);
 
     //Stop the trace first
     int error = ControlTrace(0, KERNEL_LOGGER_NAME, properties, EVENT_TRACE_CONTROL_STOP);
@@ -87,7 +85,7 @@ ULONG RealTimeEWTListener::StartTrace() {
         std::cerr << "Failed to control close trace with code: ";
         PrettyPrintTraceErrorCode(error);
     }
-    std::fill_n(buffer, buffer_size, 0);
+    std::fill_n(buffer.begin(), buffer_size, static_cast<char>(0));
 
     properties->Wnode.BufferSize = buffer_size;
     properties->Wnode.Guid = SystemTraceControlGuid;  //Will be set automatically
@@ -110,8 +108,6 @@ ULONG RealTimeEWTListener::StartTrace() {
         std::cerr << "Failed to start trace with code: ";
         PrettyPrintTraceErrorCode(error);
     }
-
-    delete[] buffer;
 
     return error;
 }
@@ -163,13 +159,10 @@ ULONG RealTimeEWTListener::StopTrace() {
     size_t session_name_size = sizeof(KERNEL_LOGGER_NAME);
     size_t buffer_size = struct_size + session_name_size;
 
-    //Allocate the buffer
-    auto buffer = new char[buffer_size];
+    //Allocate the buffer and zero initialize (as required)
+    auto buffer = std::vector<char>(buffer_size, static_cast<char>(0));
 
-    //Zero initialize entire buffer (as required)
-    std::fill_n(buffer, buffer_size, 0);
-
-    PEVENT_TRACE_PROPERTIES properties = reinterpret_cast<PEVENT_TRACE_PROPERTIES>(buffer);
+    PEVENT_TRACE_PROPERTIES properties = reinterpret_cast<PEVENT_TRACE_PROPERTIES>(buffer.data());
 
     properties->Wnode.BufferSize = buffer_size;
     properties->Wnode.Guid = SystemTraceControlGuid;  //Will be set automatically
@@ -187,7 +180,7 @@ ULONG RealTimeEWTListener::StopTrace() {
     properties->LoggerNameOffset = struct_size;
 
     //Copy name to the end
-    strcpy(buffer + struct_size, KERNEL_LOGGER_NAME);
+    strcpy(buffer.data() + struct_size, KERNEL_LOGGER_NAME);
 
     //Stop the trace first
     int error = ControlTrace(0, KERNEL_LOGGER_NAME, properties, EVENT_TRACE_CONTROL_STOP);
