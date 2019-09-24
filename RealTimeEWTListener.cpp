@@ -286,9 +286,11 @@ void WINAPI EventRecordCallback(PEVENT_RECORD pEvent) {
             status = hr;
         }
 
+#ifdef DEBUG
         wprintf(L"\nEvent GUID: %s\n", pwsEventGuid);
         wprintf(L"Event version: %d\n", pEvent->EventHeader.EventDescriptor.Version);
         wprintf(L"Event type: %d\n", pEvent->EventHeader.EventDescriptor.Opcode);
+#endif
     }
     
     //Only process DiskIO events
