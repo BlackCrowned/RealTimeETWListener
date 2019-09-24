@@ -273,17 +273,18 @@ void WINAPI EventRecordCallback(PEVENT_RECORD pEvent) {
 
         // Retrieve the event metadata.
         status = TdhGetEventInformation(pEvent, 0, NULL, pInfo, &BufferSize);
-    } else if (BufferSize == 0) {
+    } else if (BufferSize == 0 || pInfo == NULL) {
         return;
     }
 
     if (pInfo->DecodingSource == DecodingSourceWbem) {
         HRESULT hr = StringFromCLSID(pInfo->EventGuid, &pwsEventGuid);
 
-        if (FAILED(hr))
+        if (FAILED(hr) || pwsEventGuid == NULL)
         {
             wprintf(L"StringFromCLSID failed with 0x%x\n", hr);
             status = hr;
+			return;
         }
 
 #ifdef DEBUG
