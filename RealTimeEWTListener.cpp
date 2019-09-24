@@ -192,6 +192,13 @@ ULONG RealTimeEWTListener::StopTrace() {
         _sessionHandle = 0;
     }
 
+#ifdef DEBUG
+	    wprintf(L"\nTrace closed\n");
+		wprintf(L"Events lost: %d\n", properties->EventsLost);
+		wprintf(L"Realtime buffers lost: %d\n", properties->RealTimeBuffersLost);
+#endif // DEBUG
+
+
     return error;
 }
 
