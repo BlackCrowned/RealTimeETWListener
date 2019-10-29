@@ -1,5 +1,5 @@
 #pragma once
-#include "RealTimeEWTListener.h"
+#include "RealTimeETWListener.h"
 
 using namespace System;
 
@@ -30,7 +30,7 @@ public value struct CallbackData {
 
 public ref class ConsumerClass
 {
-    RealTimeEWTListener* _handle;
+    RealTimeETWListener* _handle;
 
 public:
     static UInt64 PerformanceCounterFrequency;
@@ -39,11 +39,11 @@ public:
     
     static event EventReceivedHandler^ EventReceived;
 
-    ConsumerClass(RealTimeEWTListener* handle);
+    ConsumerClass(RealTimeETWListener* handle);
 
     static ConsumerClass();
 
-    static void StartProcessThread(RealTimeEWTListener* handle);
+    static void StartProcessThread(RealTimeETWListener* handle);
     void ProcessTrace();
 
     static void FireEvent(CallbackData data);

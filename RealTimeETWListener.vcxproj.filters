@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RealTimeEWTListener.h">
+    <ClInclude Include="ConsumerClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConsumerClass.h">
+    <ClInclude Include="RealTimeETWListener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RealTimeEWTListener.cpp">
+    <ClCompile Include="ConsumerClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConsumerClass.cpp">
+    <ClCompile Include="RealTimeETWListener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

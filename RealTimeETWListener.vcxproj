@@ -20,9 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{081B5568-EC76-44F7-976F-8A6D9B3751EE}</ProjectGuid>
-    <RootNamespace>RealTimeEWTListener</RootNamespace>
+    <RootNamespace>RealtimeETWListener</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <TargetFrameworkVersion>4.7.2</TargetFrameworkVersion>
+    <ProjectName>RealTimeETWListener</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -145,11 +146,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ConsumerClass.h" />
-    <ClInclude Include="RealTimeEWTListener.h" />
+    <ClInclude Include="RealTimeETWListener.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsumerClass.cpp" />
-    <ClCompile Include="RealTimeEWTListener.cpp" />
+    <ClCompile Include="RealTimeETWListener.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

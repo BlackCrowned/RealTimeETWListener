@@ -5,7 +5,7 @@
 using namespace System;
 using namespace System::Threading;
 
-ConsumerClass::ConsumerClass(RealTimeEWTListener* handle) :
+ConsumerClass::ConsumerClass(RealTimeETWListener* handle) :
     _handle(handle)
 {
 
@@ -16,7 +16,7 @@ static ConsumerClass::ConsumerClass() {
     QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(frequency));
 }
 
-void ConsumerClass::StartProcessThread(RealTimeEWTListener* handle)
+void ConsumerClass::StartProcessThread(RealTimeETWListener* handle)
 {
     auto tmp = gcnew ConsumerClass(handle);
     Thread^ processThread = gcnew Thread(gcnew ThreadStart(tmp, &ConsumerClass::ProcessTrace));

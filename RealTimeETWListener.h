@@ -12,14 +12,14 @@
 #define RTEWTL_API __declspec(dllimport) __cdecl
 #endif
 
-class RealTimeEWTListener {
+class RealTimeETWListener {
 
     TRACEHANDLE _sessionHandle;
     TRACEHANDLE _traceHandle;
 
 public:
-    RealTimeEWTListener();
-    ~RealTimeEWTListener();
+    RealTimeETWListener();
+    ~RealTimeETWListener();
     ULONG StartTrace();
     ULONG OpenTrace();
     ULONG StartConsumption();

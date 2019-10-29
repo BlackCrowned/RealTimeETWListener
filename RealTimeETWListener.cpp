@@ -1,4 +1,4 @@
-﻿#include "RealTimeEWTListener.h"
+﻿#include "RealTimeETWListener.h"
 
 #include <algorithm>
 #include <iostream>
@@ -10,14 +10,14 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-RealTimeEWTListener::RealTimeEWTListener() :
+RealTimeETWListener::RealTimeETWListener() :
     _sessionHandle(0),
     _traceHandle(0)
 {
 
 }
 
-RealTimeEWTListener::~RealTimeEWTListener() {
+RealTimeETWListener::~RealTimeETWListener() {
     if (_traceHandle != 0) {
         CloseTrace();
     }
@@ -26,7 +26,7 @@ RealTimeEWTListener::~RealTimeEWTListener() {
     }
 }
 
-void RealTimeEWTListener::PrettyPrintTraceErrorCode(int error) {
+void RealTimeETWListener::PrettyPrintTraceErrorCode(int error) {
     switch (error) {
         case ERROR_BAD_LENGTH: std::cerr << "ERROR_BAD_LENGTH";
             break;
@@ -51,7 +51,7 @@ void RealTimeEWTListener::PrettyPrintTraceErrorCode(int error) {
     std::cerr << " (" << error << ")" << std::endl;
 }
 
-ULONG RealTimeEWTListener::StartTrace() {
+ULONG RealTimeETWListener::StartTrace() {
     size_t struct_size = sizeof(EVENT_TRACE_PROPERTIES);
     size_t session_name_size = sizeof(KERNEL_LOGGER_NAME);
     size_t buffer_size = struct_size + session_name_size;
@@ -112,7 +112,7 @@ ULONG RealTimeEWTListener::StartTrace() {
     return error;
 }
 
-ULONG RealTimeEWTListener::OpenTrace() {
+ULONG RealTimeETWListener::OpenTrace() {
     int error = 0;
     EVENT_TRACE_LOGFILE logfile;
     std::fill_n(reinterpret_cast<char*>(&logfile), sizeof(logfile), 0);
@@ -133,13 +133,13 @@ ULONG RealTimeEWTListener::OpenTrace() {
     return error;
 }
 
-ULONG RealTimeEWTListener::StartConsumption() {
+ULONG RealTimeETWListener::StartConsumption() {
     ConsumerClass::StartProcessThread(this);
 
     return 0;
 }
 
-ULONG RealTimeEWTListener::CloseTrace() {
+ULONG RealTimeETWListener::CloseTrace() {
     int error;
 
     error = ::CloseTrace(_traceHandle);
@@ -154,7 +154,7 @@ ULONG RealTimeEWTListener::CloseTrace() {
     return error;
 }
 
-ULONG RealTimeEWTListener::StopTrace() {
+ULONG RealTimeETWListener::StopTrace() {
     size_t struct_size = sizeof(EVENT_TRACE_PROPERTIES);
     size_t session_name_size = sizeof(KERNEL_LOGGER_NAME);
     size_t buffer_size = struct_size + session_name_size;
@@ -202,19 +202,19 @@ ULONG RealTimeEWTListener::StopTrace() {
     return error;
 }
 
-ULONG RealTimeEWTListener::ProcessTraceThread() {
+ULONG RealTimeETWListener::ProcessTraceThread() {
     return ProcessTrace(&_traceHandle, 1, nullptr, nullptr);
 }
 
 void RTEWTL_API genRTL(void** handle) {
     if (handle != nullptr) {
-        *handle = new RealTimeEWTListener();
+        *handle = new RealTimeETWListener();
     }
 }
 
 void RTEWTL_API deleteRTL(void** handle) {
     if (handle != nullptr && *handle != nullptr) {
-        delete static_cast<RealTimeEWTListener*>(*handle);
+        delete static_cast<RealTimeETWListener*>(*handle);
         *handle = nullptr;
     }
 }
@@ -222,7 +222,7 @@ void RTEWTL_API deleteRTL(void** handle) {
 ULONG RTEWTL_API rtlStartTrace(void* handle) {
     ULONG error;
     if (handle != nullptr) {
-        error = static_cast<RealTimeEWTListener*>(handle)->StartTrace();
+        error = static_cast<RealTimeETWListener*>(handle)->StartTrace();
     }
     else {
         error =  -1;
@@ -234,7 +234,7 @@ ULONG RTEWTL_API rtlStartTrace(void* handle) {
 ULONG RTEWTL_API rtlOpenTrace(void* handle) {
     ULONG error;
     if (handle != nullptr) {
-        error = static_cast<RealTimeEWTListener*>(handle)->OpenTrace();
+        error = static_cast<RealTimeETWListener*>(handle)->OpenTrace();
     }
     else {
         error = -1;
@@ -362,7 +362,7 @@ void WINAPI EventRecordCallback(PEVENT_RECORD pEvent) {
 
 ULONG rtlStartConsumption(void* handle) {
     ULONG error;
-    auto ewt_listener = static_cast<RealTimeEWTListener*>(handle);
+    auto ewt_listener = static_cast<RealTimeETWListener*>(handle);
     if (handle != nullptr) {
         error = ewt_listener->OpenTrace();
         if (!error)
@@ -377,7 +377,7 @@ ULONG rtlStartConsumption(void* handle) {
 
 ULONG rtlStopConsumption(void* handle) {
     ULONG error;
-    auto ewt_listener = static_cast<RealTimeEWTListener*>(handle);
+    auto ewt_listener = static_cast<RealTimeETWListener*>(handle);
     if (handle != nullptr) {
         error = ewt_listener->CloseTrace();
     }
